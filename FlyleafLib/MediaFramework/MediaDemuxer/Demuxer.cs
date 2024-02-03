@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Data;
 using System.Web;
 
 using FFmpeg.AutoGen;
@@ -182,10 +181,10 @@ public unsafe class Demuxer : RunThreadBase
 
         Utils.UIInvokeIfRequired(() =>
         {
-            BindingOperations.EnableCollectionSynchronization(Programs,         lockStreams);
-            BindingOperations.EnableCollectionSynchronization(AudioStreams,     lockStreams);
-            BindingOperations.EnableCollectionSynchronization(VideoStreams,     lockStreams);
-            BindingOperations.EnableCollectionSynchronization(SubtitlesStreams, lockStreams);
+            //BindingOperations.EnableCollectionSynchronization(Programs,         lockStreams);
+            //BindingOperations.EnableCollectionSynchronization(AudioStreams,     lockStreams);
+            //BindingOperations.EnableCollectionSynchronization(VideoStreams,     lockStreams);
+            //BindingOperations.EnableCollectionSynchronization(SubtitlesStreams, lockStreams);
         });
 
         ioopen = IOOpen;

@@ -117,8 +117,8 @@ public static class Engine
 
             Config = config ?? new EngineConfig();
 
-            if (Application.Current == null)
-                new Application();
+            //if (Application.Current == null)
+            //    new Application();
 
             StartInternalUI();
 
@@ -131,14 +131,14 @@ public static class Engine
 
     private static void StartInternalUI()
     {
-        Application.Current.Exit += (o, e) =>
-        {
-            Config.UIRefresh = false;
-            Config.UIRefreshInterval = 1;
+        //Application.Current.Exit += (o, e) =>
+        //{
+        //    Config.UIRefresh = false;
+        //    Config.UIRefreshInterval = 1;
                 
-            while (Players.Count != 0)
-                Players[0].Dispose();
-        };
+        //    while (Players.Count != 0)
+        //        Players[0].Dispose();
+        //};
 
         Logger.SetOutput();
 

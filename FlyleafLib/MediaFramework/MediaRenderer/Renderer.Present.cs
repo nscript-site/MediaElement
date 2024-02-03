@@ -2,9 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Vortice.DXGI;
-using Vortice.Mathematics;
-
 using FlyleafLib.MediaFramework.MediaDecoder;
 using FlyleafLib.MediaFramework.MediaFrame;
 
@@ -37,10 +34,10 @@ public unsafe partial class Renderer
             }
             catch (Exception e)
             {
-                if (CanWarn) Log.Warn($"Present frame failed {e.Message} | {Device?.DeviceRemovedReason}");
+                //if (CanWarn) Log.Warn($"Present frame failed {e.Message} | {Device?.DeviceRemovedReason}");
                 VideoDecoder.DisposeFrame(frame);
 
-                vpiv?.Dispose();
+                //vpiv?.Dispose();
 
                 return false;
 
@@ -103,31 +100,31 @@ public unsafe partial class Renderer
         // TBR: Replica performance issue with D3D11 (more zoom more gpu overload)
         if (videoProcessor == VideoProcessors.D3D11)
         {
-            if (frame.bufRef != null)
-            {
-                vpivd.Texture2D.ArraySlice = frame.subresource;
-                vd1.CreateVideoProcessorInputView(VideoDecoder.textureFFmpeg, vpe, vpivd, out vpiv);
-            }
-            else
-            {
-                vpivd.Texture2D.ArraySlice = 0;
-                vd1.CreateVideoProcessorInputView(frame.textures[0], vpe, vpivd, out vpiv);
-            }
+            //if (frame.bufRef != null)
+            //{
+            //    vpivd.Texture2D.ArraySlice = frame.subresource;
+            //    vd1.CreateVideoProcessorInputView(VideoDecoder.textureFFmpeg, vpe, vpivd, out vpiv);
+            //}
+            //else
+            //{
+            //    vpivd.Texture2D.ArraySlice = 0;
+            //    //vd1.CreateVideoProcessorInputView(frame.textures[0], vpe, vpivd, out vpiv);
+            //}
 
-            vpsa[0].InputSurface = vpiv;
-            vc.VideoProcessorBlt(vp, vpov, 0, 1, vpsa);
-            swapChain.Present(Config.Video.VSync, PresentFlags.None);
+            //vpsa[0].InputSurface = vpiv;
+            //vc.VideoProcessorBlt(vp, vpov, 0, 1, vpsa);
+            ////swapChain.Present(Config.Video.VSync, PresentFlags.None);
             
-            vpiv.Dispose();
+            //vpiv.Dispose();
         }
         else
         {
-            context.OMSetRenderTargets(backBufferRtv);
-            context.ClearRenderTargetView(backBufferRtv, Config.Video._BackgroundColor);
-            context.RSSetViewport(GetViewport);
-            context.PSSetShaderResources(0, frame.srvs);
-            context.Draw(6, 0);
-            swapChain.Present(Config.Video.VSync, PresentFlags.None);
+            //context.OMSetRenderTargets(backBufferRtv);
+            //context.ClearRenderTargetView(backBufferRtv, Config.Video._BackgroundColor);
+            //context.RSSetViewport(GetViewport);
+            //context.PSSetShaderResources(0, frame.srvs);
+            //context.Draw(6, 0);
+            //swapChain.Present(Config.Video.VSync, PresentFlags.None);
         }
 
         if (child != null)
@@ -143,17 +140,17 @@ public unsafe partial class Renderer
                 if (SCDisposed)
                     return;
 
-                if (LastFrame != null && (LastFrame.textures != null || LastFrame.bufRef != null))
-                    PresentInternal(LastFrame);
-                else
-                {
-                    context.ClearRenderTargetView(backBufferRtv, Config.Video._BackgroundColor);
-                    swapChain.Present(Config.Video.VSync, PresentFlags.None);
-                }
+                //if (LastFrame != null && (LastFrame.textures != null || LastFrame.bufRef != null))
+                //    PresentInternal(LastFrame);
+                //else
+                //{
+                //    context.ClearRenderTargetView(backBufferRtv, Config.Video._BackgroundColor);
+                //    swapChain.Present(Config.Video.VSync, PresentFlags.None);
+                //}
             }
             catch (Exception e)
             {
-                if (CanWarn) Log.Warn($"Present idle failed {e.Message} | {Device.DeviceRemovedReason}");
+                //if (CanWarn) Log.Warn($"Present idle failed {e.Message} | {Device.DeviceRemovedReason}");
             }
             finally
             {

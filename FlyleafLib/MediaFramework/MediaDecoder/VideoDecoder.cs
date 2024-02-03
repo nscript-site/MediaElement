@@ -8,11 +8,6 @@ using FFmpeg.AutoGen;
 using static FFmpeg.AutoGen.ffmpeg;
 using static FFmpeg.AutoGen.AVCodecID;
 
-using Vortice.DXGI;
-using Vortice.Direct3D11;
-
-using ID3D11Texture2D = Vortice.Direct3D11.ID3D11Texture2D;
-
 using FlyleafLib.MediaFramework.MediaStream;
 using FlyleafLib.MediaFramework.MediaFrame;
 using FlyleafLib.MediaFramework.MediaRenderer;
@@ -74,26 +69,15 @@ public unsafe class VideoDecoder : DecoderBase
         Disposed = false; // We don't dipose the renderer (decoderContext does)
     }
     public void DestroyRenderer() => Renderer?.Dispose();
-    public void CreateSwapChain(IntPtr handle)
-    {
-        CreateRenderer();
-        Renderer.InitializeSwapChain(handle);
-    }
-    public void CreateSwapChain(Action<IDXGISwapChain2> swapChainWinUIClbk)
-    {
-        Renderer.SwapChainWinUIClbk = swapChainWinUIClbk;
-        if (Renderer.SwapChainWinUIClbk != null)
-            Renderer.InitializeWinUISwapChain();
 
-    }
     public void DestroySwapChain() => Renderer?.DisposeSwapChain();
 
     #region Video Acceleration (Should be disposed seperately)
     const int               AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX = 0x01;
-    const AVHWDeviceType    HW_DEVICE = AVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA;
+    //const AVHWDeviceType    HW_DEVICE = AVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA;
 
-    internal ID3D11Texture2D
-                            textureFFmpeg;
+    //internal ID3D11Texture2D
+    //                        textureFFmpeg;
     AVCodecContext_get_format 
                             getHWformat;
     bool                    disableGetFormat;
@@ -108,41 +92,41 @@ public unsafe class VideoDecoder : DecoderBase
             if (config == null) break;
             if ((config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) == 0 || config->pix_fmt == AVPixelFormat.AV_PIX_FMT_NONE) continue;
             
-            if (config->device_type == HW_DEVICE && config->pix_fmt == PIX_FMT_HWACCEL) return true;
+            //if (config->device_type == HW_DEVICE && config->pix_fmt == PIX_FMT_HWACCEL) return true;
         }
 
         return false;
     }
-    internal int InitVA()
-    {
-        int ret;
-        AVHWDeviceContext*      device_ctx;
-        AVD3D11VADeviceContext* d3d11va_device_ctx;
+    //internal int InitVA()
+    //{
+    //    int ret;
+    //    AVHWDeviceContext*      device_ctx;
+    //    AVD3D11VADeviceContext* d3d11va_device_ctx;
 
-        if (Renderer.Device == null || hw_device_ctx != null) return -1;
+    //    if (hw_device_ctx != null) return -1;
 
-        hw_device_ctx  = av_hwdevice_ctx_alloc(HW_DEVICE);
+    //    //hw_device_ctx  = av_hwdevice_ctx_alloc(HW_DEVICE);
 
-        device_ctx          = (AVHWDeviceContext*) hw_device_ctx->data;
-        d3d11va_device_ctx  = (AVD3D11VADeviceContext*) device_ctx->hwctx;
-        d3d11va_device_ctx->device
-                            = (FFmpeg.AutoGen.ID3D11Device*) Renderer.Device.NativePointer;
+    //    //device_ctx          = (AVHWDeviceContext*) hw_device_ctx->data;
+    //    //d3d11va_device_ctx  = (AVD3D11VADeviceContext*) device_ctx->hwctx;
+    //    //d3d11va_device_ctx->device
+    //    //                    = (FFmpeg.AutoGen.ID3D11Device*) Renderer.Device.NativePointer;
 
-        ret = av_hwdevice_ctx_init(hw_device_ctx);
-        if (ret != 0)
-        {
-            Log.Error($"VA Failed - {FFmpegEngine.ErrorCodeToMsg(ret)} ({ret})");
+    //    //ret = av_hwdevice_ctx_init(hw_device_ctx);
+    //    //if (ret != 0)
+    //    //{
+    //    //    Log.Error($"VA Failed - {FFmpegEngine.ErrorCodeToMsg(ret)} ({ret})");
             
-            fixed(AVBufferRef** ptr = &hw_device_ctx)
-                av_buffer_unref(ptr);
+    //    //    fixed(AVBufferRef** ptr = &hw_device_ctx)
+    //    //        av_buffer_unref(ptr);
 
-            hw_device_ctx = null;
-        }
+    //    //    hw_device_ctx = null;
+    //    //}
 
-        Renderer.Device.AddRef(); // Important to give another reference for FFmpeg so we can dispose without issues
+    //    //Renderer.Device.AddRef(); // Important to give another reference for FFmpeg so we can dispose without issues
 
-        return ret;
-    }
+    //    return ret;
+    //}
 
     private AVPixelFormat get_format(AVCodecContext* avctx, AVPixelFormat* pix_fmts)
     {
@@ -231,45 +215,47 @@ public unsafe class VideoDecoder : DecoderBase
 
     private int AllocateHWFrames()
     {
-        if (hwframes != null)
-            fixed(AVBufferRef** ptr = &hwframes)
-                av_buffer_unref(ptr);
+        return 1;
+
+        //if (hwframes != null)
+        //    fixed(AVBufferRef** ptr = &hwframes)
+        //        av_buffer_unref(ptr);
         
-        hwframes = null;
+        //hwframes = null;
 
-        if (codecCtx->hw_frames_ctx != null)
-            av_buffer_unref(&codecCtx->hw_frames_ctx);
+        //if (codecCtx->hw_frames_ctx != null)
+        //    av_buffer_unref(&codecCtx->hw_frames_ctx);
 
-        if (avcodec_get_hw_frames_parameters(codecCtx, codecCtx->hw_device_ctx, PIX_FMT_HWACCEL, &codecCtx->hw_frames_ctx) != 0)
-            return -1;
+        //if (avcodec_get_hw_frames_parameters(codecCtx, codecCtx->hw_device_ctx, PIX_FMT_HWACCEL, &codecCtx->hw_frames_ctx) != 0)
+        //    return -1;
 
-        AVHWFramesContext* hw_frames_ctx = (AVHWFramesContext*)codecCtx->hw_frames_ctx->data;
-        hw_frames_ctx->initial_pool_size += Config.Decoder.MaxVideoFrames;
+        //AVHWFramesContext* hw_frames_ctx = (AVHWFramesContext*)codecCtx->hw_frames_ctx->data;
+        //hw_frames_ctx->initial_pool_size += Config.Decoder.MaxVideoFrames;
 
-        AVD3D11VAFramesContext *va_frames_ctx = (AVD3D11VAFramesContext *)hw_frames_ctx->hwctx;
-        va_frames_ctx->BindFlags  |= (uint)BindFlags.Decoder | (uint)BindFlags.ShaderResource;
+        //AVD3D11VAFramesContext *va_frames_ctx = (AVD3D11VAFramesContext *)hw_frames_ctx->hwctx;
+        //va_frames_ctx->BindFlags  |= (uint)BindFlags.Decoder | (uint)BindFlags.ShaderResource;
         
-        hwframes = av_buffer_ref(codecCtx->hw_frames_ctx);
+        //hwframes = av_buffer_ref(codecCtx->hw_frames_ctx);
 
-        int ret = av_hwframe_ctx_init(codecCtx->hw_frames_ctx);
-        if (ret == 0)
-        {
-            lock (Renderer.lockDevice)
-            {
-                textureFFmpeg   = new ID3D11Texture2D((IntPtr) va_frames_ctx->texture);
-                ZeroCopy = Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Enabled || (Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Auto && codecCtx->width == textureFFmpeg.Description.Width && codecCtx->height == textureFFmpeg.Description.Height);
-                filledFromCodec = false;
-            }
-        }
+        //int ret = av_hwframe_ctx_init(codecCtx->hw_frames_ctx);
+        //if (ret == 0)
+        //{
+        //    lock (Renderer.lockDevice)
+        //    {
+        //        textureFFmpeg   = new ID3D11Texture2D((IntPtr) va_frames_ctx->texture);
+        //        ZeroCopy = Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Enabled || (Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Auto && codecCtx->width == textureFFmpeg.Description.Width && codecCtx->height == textureFFmpeg.Description.Height);
+        //        filledFromCodec = false;
+        //    }
+        //}
 
-        return ret;
+        //return ret;
     }
     internal void RecalculateZeroCopy()
     {
         lock (Renderer.lockDevice)
         {
             bool save = ZeroCopy;
-            ZeroCopy = VideoAccelerated && (Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Enabled || (Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Auto && codecCtx->width == textureFFmpeg.Description.Width && codecCtx->height == textureFFmpeg.Description.Height));
+            //ZeroCopy = VideoAccelerated && (Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Enabled || (Config.Decoder.ZeroCopy == FlyleafLib.ZeroCopy.Auto && codecCtx->width == textureFFmpeg.Description.Width && codecCtx->height == textureFFmpeg.Description.Height));
             if (save != ZeroCopy)
             {
                 Renderer?.ConfigPlanes();
@@ -286,22 +272,22 @@ public unsafe class VideoDecoder : DecoderBase
         
         VideoAccelerated = false;
 
-        if (!swFallback && Config.Video.VideoAcceleration && Renderer.Device.FeatureLevel >= Vortice.Direct3D.FeatureLevel.Level_10_0)
-        {
-            if (CheckCodecSupport(codec))
-            {
-                if (InitVA() == 0)
-                {
-                    codecCtx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
-                    VideoAccelerated = true;
-                    Log.Debug("VA Success");
-                }
-            }
-            else
-                Log.Info($"VA {codec->id} not supported");
-        }
-        else
-            Log.Debug("VA Disabled");
+        //if (!swFallback && Config.Video.VideoAcceleration)
+        //{
+        //    if (CheckCodecSupport(codec))
+        //    {
+        //        if (InitVA() == 0)
+        //        {
+        //            codecCtx->hw_device_ctx = av_buffer_ref(hw_device_ctx);
+        //            VideoAccelerated = true;
+        //            Log.Debug("VA Success");
+        //        }
+        //    }
+        //    else
+        //        Log.Info($"VA {codec->id} not supported");
+        //}
+        //else
+        //    Log.Debug("VA Disabled");
 
         // Can't get data from here?
         //var t1 = av_stream_get_side_data(VideoStream.AVStream, AVPacketSideDataType.AV_PKT_DATA_MASTERING_DISPLAY_METADATA, null);
@@ -1094,20 +1080,20 @@ public unsafe class VideoDecoder : DecoderBase
         if (frame == null)
             return;
 
-        if (frame.textures != null)
-            for (int i=0; i<frame.textures.Length; i++)
-                frame.textures[i].Dispose();
+        //if (frame.textures != null)
+        //    for (int i=0; i<frame.textures.Length; i++)
+        //        frame.textures[i].Dispose();
 
-        if (frame.srvs != null)
-            for (int i=0; i<frame.srvs.Length; i++)
-                frame.srvs[i].Dispose();
+        //if (frame.srvs != null)
+        //    for (int i=0; i<frame.srvs.Length; i++)
+        //        frame.srvs[i].Dispose();
 
         if (frame.bufRef != null)
             fixed (AVBufferRef** ptr = &frame.bufRef)
                 av_buffer_unref(ptr);
 
-        frame.srvs      = null;
-        frame.textures  = null;
+        //frame.srvs      = null;
+        //frame.textures  = null;
         frame.bufRef    = null;
     }
     protected override void DisposeInternal()

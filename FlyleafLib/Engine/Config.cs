@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 #endif
 using System.Threading;
 using System.Xml.Serialization;
-
+using Avalonia.Media;
 using FlyleafLib.MediaFramework.MediaDecoder;
 using FlyleafLib.MediaFramework.MediaFrame;
 using FlyleafLib.MediaFramework.MediaRenderer;
@@ -259,7 +259,8 @@ public class Config : NotifyPropertyChanged
         /// <summary>
         /// The upper limit of the volume amplifier
         /// </summary>
-        public int      VolumeMax                   { get => _VolumeMax; set { Set(ref _VolumeMax, value); if (player != null && player.Audio.masteringVoice != null) player.Audio.masteringVoice.Volume = value / 100f;  } }
+        public int      VolumeMax                   { get => _VolumeMax; set { Set(ref _VolumeMax, value); if (player != null && player.Audio != null) player.Audio.SetMasteringVoice(value / 100f);  } }
+
         int _VolumeMax = 150;
 
         /// <summary>
@@ -537,9 +538,9 @@ public class Config : NotifyPropertyChanged
         /// <summary>
         /// Background color of the player's control
         /// </summary>
-        public System.Windows.Media.Color
-                                BackgroundColor             { get => VorticeToWPFColor(_BackgroundColor);  set { Set(ref _BackgroundColor, WPFToVorticeColor(value)); player?.renderer?.UpdateBackgroundColor(); } }
-        internal Vortice.Mathematics.Color _BackgroundColor = (Vortice.Mathematics.Color)Vortice.Mathematics.Colors.Black;
+        public Color  BackgroundColor             { get => _BackgroundColor; 
+            set { Set(ref _BackgroundColor, value); player?.renderer?.UpdateBackgroundColor(); } }
+        internal Color _BackgroundColor = Colors.Black;
 
         /// <summary>
         /// Delays the clear screen of the last frame until the new input has been opened
@@ -600,7 +601,7 @@ public class Config : NotifyPropertyChanged
         /// * D3D11 possible performs better with color conversion and filters, FLVP supports only brightness/contrast filters
         /// * D3D11 supports deinterlace (bob)
         /// </summary>
-        public VideoProcessors  VideoProcessor              { get => _VideoProcessor; set { if (Set(ref _VideoProcessor, value)) player?.renderer?.UpdateVideoProcessor(); } }
+        public VideoProcessors  VideoProcessor              { get => _VideoProcessor; set { if (Set(ref _VideoProcessor, value)) { } /*player?.renderer?.UpdateVideoProcessor();*/ } }
         VideoProcessors _VideoProcessor = VideoProcessors.Auto;
 
         /// <summary>
@@ -612,24 +613,24 @@ public class Config : NotifyPropertyChanged
         /// Enables the video processor to perform post process deinterlacing
         /// (D3D11 video processor should be enabled and support bob deinterlace method)
         /// </summary>
-        public bool             Deinterlace                 { get=> _Deinterlace;   set { if (Set(ref _Deinterlace, value)) player?.renderer?.UpdateDeinterlace(); } }
-        bool _Deinterlace;
+        //public bool             Deinterlace                 { get=> _Deinterlace;   set { if (Set(ref _Deinterlace, value)) player?.renderer?.UpdateDeinterlace(); } }
+        //bool _Deinterlace;
 
-        public bool             DeinterlaceBottomFirst      { get=> _DeinterlaceBottomFirst; set { if (Set(ref _DeinterlaceBottomFirst, value)) player?.renderer?.UpdateDeinterlace(); } }
-        bool _DeinterlaceBottomFirst;
+        //public bool             DeinterlaceBottomFirst      { get=> _DeinterlaceBottomFirst; set { if (Set(ref _DeinterlaceBottomFirst, value)) player?.renderer?.UpdateDeinterlace(); } }
+        //bool _DeinterlaceBottomFirst;
 
-        /// <summary>
-        /// The HDR to SDR method that will be used by the pixel shader
-        /// </summary>
-        public unsafe HDRtoSDRMethod
-                                HDRtoSDRMethod              { get => _HDRtoSDRMethod; set { if (Set(ref _HDRtoSDRMethod, value) && player != null && player.VideoDecoder.VideoStream != null && player.VideoDecoder.VideoStream.ColorSpace == ColorSpace.BT2020) player.renderer.UpdateHDRtoSDR(); }}
+        ///// <summary>
+        ///// The HDR to SDR method that will be used by the pixel shader
+        ///// </summary>
+        //public unsafe HDRtoSDRMethod
+        //                        HDRtoSDRMethod              { get => _HDRtoSDRMethod; set { if (Set(ref _HDRtoSDRMethod, value) && player != null && player.VideoDecoder.VideoStream != null && player.VideoDecoder.VideoStream.ColorSpace == ColorSpace.BT2020) player.renderer.UpdateHDRtoSDR(); }}
         HDRtoSDRMethod _HDRtoSDRMethod = HDRtoSDRMethod.Hable;
 
         /// <summary>
         /// The HDR to SDR Tone float correnction (not used by Reinhard) 
         /// </summary>
-        public unsafe float     HDRtoSDRTone                { get => _HDRtoSDRTone; set { if (Set(ref _HDRtoSDRTone, value) && player != null && player.VideoDecoder.VideoStream != null && player.VideoDecoder.VideoStream.ColorSpace == ColorSpace.BT2020) player.renderer.UpdateHDRtoSDR(); } }
-        float _HDRtoSDRTone = 1.4f;
+        //public unsafe float     HDRtoSDRTone                { get => _HDRtoSDRTone; set { if (Set(ref _HDRtoSDRTone, value) && player != null && player.VideoDecoder.VideoStream != null && player.VideoDecoder.VideoStream.ColorSpace == ColorSpace.BT2020) player.renderer.UpdateHDRtoSDR(); } }
+        //float _HDRtoSDRTone = 1.4f;
 
         /// <summary>
         /// Whether the renderer will use 10-bit swap chaing or 8-bit output

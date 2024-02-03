@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading;
 
 using FFmpeg.AutoGen;
-using Vortice.XAudio2;
 
 using FlyleafLib.MediaFramework.MediaDecoder;
 
@@ -719,18 +718,19 @@ unsafe partial class Player
             // This can cause high cpu with small samples (increase max audio frames and consider using min samples/duration for audio frames)
             lock (Audio.locker)
             {
-                var state = Audio.sourceVoice.State;
+                //TODO: 
+                //var state = Audio.sourceVoice.State;
 
-                while (state.BuffersQueued >= XAudio2.MaximumQueuedBuffers - 5 && IsPlaying)
-                {
-                    Thread.Sleep(10);
-                    state = Audio.sourceVoice.State;
-                }
+                //while (state.BuffersQueued >= XAudio2.MaximumQueuedBuffers - 5 && IsPlaying)
+                //{
+                //    Thread.Sleep(10);
+                //    state = Audio.sourceVoice.State;
+                //}
                 
-                var bufferedDuration = (long) ((Audio.submittedSamples - state.SamplesPlayed) * Audio.Timebase);
+                //var bufferedDuration = (long) ((Audio.submittedSamples - state.SamplesPlayed) * Audio.Timebase);
 
-                if (bufferedDuration > 40 * 10000)
-                    Thread.Sleep(10);
+                //if (bufferedDuration > 40 * 10000)
+                //    Thread.Sleep(10);
             }
         }
     }

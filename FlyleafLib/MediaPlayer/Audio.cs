@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 
-using Vortice.Multimedia;
-using Vortice.XAudio2;
-
-using static Vortice.XAudio2.XAudio2;
-
 using FlyleafLib.MediaFramework.MediaContext;
 using FlyleafLib.MediaFramework.MediaFrame;
 using FlyleafLib.MediaFramework.MediaStream;
@@ -72,6 +67,11 @@ public class Audio : NotifyPropertyChanged
     public int      SampleRate      { get => sampleRate;        internal set => Set(ref _SampleRate, value); }
     internal int    _SampleRate, sampleRate;
 
+    public void SetMasteringVoice(double volume)
+    {
+
+    }
+
     /// <summary>
     /// Audio player's volume / amplifier (valid values 0 - no upper limit)
     /// </summary>
@@ -79,26 +79,27 @@ public class Audio : NotifyPropertyChanged
     {
         get
         {
-            lock (locker)
-                return sourceVoice == null || Mute ? _Volume : (int) ((decimal)sourceVoice.Volume * 100);
+            return 100;
+            //lock (locker)
+            //    return sourceVoice == null || Mute ? _Volume : (int) ((decimal)sourceVoice.Volume * 100);
         }
         set
         {
-            if (value > Config.Player.VolumeMax || value < 0)
-                return;
+            //if (value > Config.Player.VolumeMax || value < 0)
+            //    return;
             
-            if (value == 0)
-                Mute = true;
-            else if (Mute)
-            {
-                _Volume = value;
-                Mute = false;
-            }
-            else
-            {
-                if (sourceVoice != null)
-                    sourceVoice.Volume = Math.Max(0, value / 100.0f);
-            }
+            //if (value == 0)
+            //    Mute = true;
+            //else if (Mute)
+            //{
+            //    _Volume = value;
+            //    Mute = false;
+            //}
+            //else
+            //{
+            //    if (sourceVoice != null)
+            //        sourceVoice.Volume = Math.Max(0, value / 100.0f);
+            //}
 
             Set(ref _Volume, value, false);
         }
@@ -113,13 +114,13 @@ public class Audio : NotifyPropertyChanged
         get => mute;
         set
         {
-            lock (locker)
-            {
-                if (sourceVoice == null)
-                    return;
+            //lock (locker)
+            //{
+            //    if (sourceVoice == null)
+            //        return;
 
-                sourceVoice.Volume = value ? 0 : _Volume / 100.0f;
-            }
+            //    sourceVoice.Volume = value ? 0 : _Volume / 100.0f;
+            //}
 
             Set(ref mute, value, false);
         }
@@ -176,13 +177,13 @@ public class Audio : NotifyPropertyChanged
     internal readonly object
                             locker = new();
 
-    IXAudio2                xaudio2;
-    internal IXAudio2MasteringVoice
-                            masteringVoice;
-    internal IXAudio2SourceVoice
-                            sourceVoice;
-    WaveFormat              waveFormat  = new(48000, 16, 2); // Output Audio Device
-    AudioBuffer             audioBuffer = new();
+    //IXAudio2                xaudio2;
+    //internal IXAudio2MasteringVoice
+    //                        masteringVoice;
+    //internal IXAudio2SourceVoice
+    //                        sourceVoice;
+    //WaveFormat              waveFormat  = new(48000, 16, 2); // Output Audio Device
+    //AudioBuffer             audioBuffer = new();
     internal double         Timebase;
     internal ulong          submittedSamples;
     #endregion
@@ -212,62 +213,62 @@ public class Audio : NotifyPropertyChanged
 
     internal void Initialize()
     {
-        lock (locker)
-        {
-            if (Engine.Audio.Failed)
-            {
-                Config.Audio.Enabled = false;
-                return;
-            }
+        //lock (locker)
+        //{
+        //    if (Engine.Audio.Failed)
+        //    {
+        //        Config.Audio.Enabled = false;
+        //        return;
+        //    }
 
-            sampleRate = decoder != null && decoder.AudioStream != null && decoder.AudioStream.SampleRate > 0 ? decoder.AudioStream.SampleRate : 48000;
-            player.Log.Info($"Initialiazing audio ({Device} @ {SampleRate}Hz)");
+        //    sampleRate = decoder != null && decoder.AudioStream != null && decoder.AudioStream.SampleRate > 0 ? decoder.AudioStream.SampleRate : 48000;
+        //    player.Log.Info($"Initialiazing audio ({Device} @ {SampleRate}Hz)");
 
-            Dispose();
+        //    Dispose();
 
-            try
-            {
-                xaudio2 = XAudio2Create();
+        //    try
+        //    {
+        //        xaudio2 = XAudio2Create();
 
-                try
-                {
-	                masteringVoice = xaudio2.CreateMasteringVoice(0, 0, AudioStreamCategory.GameEffects, _Device == Engine.Audio.DefaultDeviceName ? null : Engine.Audio.GetDeviceId(_Device));
-                }
-                catch (Exception) // Win 7/8 compatibility issue https://social.msdn.microsoft.com/Forums/en-US/4989237b-814c-4a7a-8a35-00714d36b327/xaudio2-how-to-get-device-id-for-mastering-voice?forum=windowspro-audiodevelopment
-                {
-                    masteringVoice = xaudio2.CreateMasteringVoice(0, 0, AudioStreamCategory.GameEffects, _Device == Engine.Audio.DefaultDeviceName ? null : (@"\\?\swd#mmdevapi#" + Engine.Audio.GetDeviceId(_Device).ToLower() + @"#{e6327cad-dcec-4949-ae8a-991e976a79d2}")); 
-                }
+        //        try
+        //        {
+	       //         masteringVoice = xaudio2.CreateMasteringVoice(0, 0, AudioStreamCategory.GameEffects, _Device == Engine.Audio.DefaultDeviceName ? null : Engine.Audio.GetDeviceId(_Device));
+        //        }
+        //        catch (Exception) // Win 7/8 compatibility issue https://social.msdn.microsoft.com/Forums/en-US/4989237b-814c-4a7a-8a35-00714d36b327/xaudio2-how-to-get-device-id-for-mastering-voice?forum=windowspro-audiodevelopment
+        //        {
+        //            masteringVoice = xaudio2.CreateMasteringVoice(0, 0, AudioStreamCategory.GameEffects, _Device == Engine.Audio.DefaultDeviceName ? null : (@"\\?\swd#mmdevapi#" + Engine.Audio.GetDeviceId(_Device).ToLower() + @"#{e6327cad-dcec-4949-ae8a-991e976a79d2}")); 
+        //        }
 
-                sourceVoice = xaudio2.CreateSourceVoice(waveFormat, false);
-                sourceVoice.SetSourceSampleRate(SampleRate);
-                sourceVoice.Start();
+        //        sourceVoice = xaudio2.CreateSourceVoice(waveFormat, false);
+        //        sourceVoice.SetSourceSampleRate(SampleRate);
+        //        sourceVoice.Start();
 
-                submittedSamples        = 0;
-                Timebase                = 1000 * 10000.0 / sampleRate;
-                masteringVoice.Volume   = Config.Player.VolumeMax / 100.0f;
-                sourceVoice.Volume      = mute ? 0 : Math.Max(0, _Volume / 100.0f);
-            }
-            catch (Exception e)
-            {
-                player.Log.Info($"Audio initialization failed ({e.Message})");
-                Config.Audio.Enabled = false;
-            }
-        }
+        //        submittedSamples        = 0;
+        //        Timebase                = 1000 * 10000.0 / sampleRate;
+        //        masteringVoice.Volume   = Config.Player.VolumeMax / 100.0f;
+        //        sourceVoice.Volume      = mute ? 0 : Math.Max(0, _Volume / 100.0f);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        player.Log.Info($"Audio initialization failed ({e.Message})");
+        //        Config.Audio.Enabled = false;
+        //    }
+        //}
     }
     internal void Dispose()
     {
-        lock (locker)
-        {
-            if (xaudio2 == null)
-                return;
+        //lock (locker)
+        //{
+        //    if (xaudio2 == null)
+        //        return;
 
-            xaudio2.        Dispose();
-            sourceVoice?.   Dispose();
-            masteringVoice?.Dispose();
-            xaudio2         = null;
-            sourceVoice     = null;
-            masteringVoice  = null;
-        }
+        //    xaudio2.        Dispose();
+        //    sourceVoice?.   Dispose();
+        //    masteringVoice?.Dispose();
+        //    xaudio2         = null;
+        //    sourceVoice     = null;
+        //    masteringVoice  = null;
+        //}
     }
 
     // TBR: Very rarely could crash the app on audio device change while playing? Requires two locks (Audio's locker and aFrame)
@@ -275,42 +276,55 @@ public class Audio : NotifyPropertyChanged
     [System.Security.SecurityCritical]
     internal void AddSamples(AudioFrame aFrame)
     {
-        try
-        {
-            if (CanTrace)
-                player.Log.Trace($"[A] Presenting {Utils.TicksToTime(player.aFrame.timestamp)}");
+        //try
+        //{
+        //    if (CanTrace)
+        //        player.Log.Trace($"[A] Presenting {Utils.TicksToTime(player.aFrame.timestamp)}");
 
-            framesDisplayed++;
+        //    framesDisplayed++;
 
-            submittedSamples += (ulong) (aFrame.dataLen / 4); // ASampleBytes
-            SamplesAdded?.Invoke(this, aFrame);
+        //    submittedSamples += (ulong) (aFrame.dataLen / 4); // ASampleBytes
+        //    SamplesAdded?.Invoke(this, aFrame);
             
-            audioBuffer.AudioDataPointer= aFrame.dataPtr;
-            audioBuffer.AudioBytes      = aFrame.dataLen;
-            sourceVoice.SubmitSourceBuffer(audioBuffer);
-        }
-        catch (Exception e) // Happens on audio device changed/removed
-        {
-            if (CanDebug)
-                player.Log.Debug($"[Audio] Submitting samples failed ({e.Message})");
+        //    audioBuffer.AudioDataPointer= aFrame.dataPtr;
+        //    audioBuffer.AudioBytes      = aFrame.dataLen;
+        //    sourceVoice.SubmitSourceBuffer(audioBuffer);
+        //}
+        //catch (Exception e) // Happens on audio device changed/removed
+        //{
+        //    if (CanDebug)
+        //        player.Log.Debug($"[Audio] Submitting samples failed ({e.Message})");
 
-            ClearBuffer(); // TBR: Inform player to resync audio?
+        //    ClearBuffer(); // TBR: Inform player to resync audio?
+        //}
+    }
+    internal long GetBufferedDuration() 
+    {
+        throw new NotImplementedException();
+        lock (locker) {
+            //return (long) ((submittedSamples - sourceVoice.State.SamplesPlayed) * Timebase);
         }
     }
-    internal long GetBufferedDuration() { lock (locker) { return (long) ((submittedSamples - sourceVoice.State.SamplesPlayed) * Timebase); } }
-    internal long GetDeviceDelay() => (long) ((xaudio2.PerformanceData.CurrentLatencyInSamples * Timebase) - 80000); // TODO: VBlack delay (8ms correction for now)
+
+    internal long GetDeviceDelay()
+    {
+        return 0;
+
+        //return (long)((xaudio2.PerformanceData.CurrentLatencyInSamples * Timebase) - 80000);
+    }
+
     internal void ClearBuffer()
     {
-        lock (locker)
-        {
-            if (sourceVoice == null)
-                return;
+        //lock (locker)
+        //{
+        //    if (sourceVoice == null)
+        //        return;
 
-            sourceVoice.Stop();
-            sourceVoice.FlushSourceBuffers();
-            sourceVoice.Start();
-            submittedSamples = sourceVoice.State.SamplesPlayed;
-        }
+        //    sourceVoice.Stop();
+        //    sourceVoice.FlushSourceBuffers();
+        //    sourceVoice.Start();
+        //    submittedSamples = sourceVoice.State.SamplesPlayed;
+        //}
     }
 
     internal void Reset()

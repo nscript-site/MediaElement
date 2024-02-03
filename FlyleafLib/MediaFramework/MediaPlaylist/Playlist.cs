@@ -87,7 +87,7 @@ public class Playlist : NotifyPropertyChanged
     public Playlist(int uniqueId)
     {
         Log = new LogHandler(("[#" + uniqueId + "]").PadRight(8, ' ') + " [Playlist] ");
-        UIInvokeIfRequired(() => System.Windows.Data.BindingOperations.EnableCollectionSynchronization(Items, lockItems));
+        //UIInvokeIfRequired(() => System.Windows.Data.BindingOperations.EnableCollectionSynchronization(Items, lockItems));
     }
 
     public void Reset()
@@ -139,9 +139,9 @@ public class Playlist : NotifyPropertyChanged
 
         UIInvokeIfRequired(() =>
         {
-            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(item.ExternalAudioStreams, item.lockExternalStreams);
-            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(item.ExternalVideoStreams, item.lockExternalStreams);
-            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(item.ExternalSubtitlesStreams, item.lockExternalStreams);
+            //System.Windows.Data.BindingOperations.EnableCollectionSynchronization(item.ExternalAudioStreams, item.lockExternalStreams);
+            //System.Windows.Data.BindingOperations.EnableCollectionSynchronization(item.ExternalVideoStreams, item.lockExternalStreams);
+            //System.Windows.Data.BindingOperations.EnableCollectionSynchronization(item.ExternalSubtitlesStreams, item.lockExternalStreams);
         });
     }
 }

@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-
+using Avalonia.Threading;
 using Microsoft.Win32;
 
 namespace FlyleafLib;
@@ -76,19 +76,19 @@ public static partial class Utils
     /// <param name="action"></param>
     public static void UI(Action action)
     {
-#if DEBUG
-        if (Application.Current == null)
-            return;
-#endif
+//#if DEBUG
+//        if (Application.Current == null)
+//            return;
+//#endif
 
-        Application.Current.Dispatcher.BeginInvoke(action, System.Windows.Threading.DispatcherPriority.DataBind);
+//        Application.Current.Dispatcher.BeginInvoke(action, System.Windows.Threading.DispatcherPriority.DataBind);
     }
 
     /// <summary>
     /// Invokes the UI thread to execute the specified action
     /// </summary>
     /// <param name="action"></param>
-    public static void UIInvoke(Action action) => Application.Current.Dispatcher.Invoke(action);
+    public static void UIInvoke(Action action) => Dispatcher.UIThread.Invoke(action);
 
     /// <summary>
     /// Invokes the UI thread if required to execute the specified action
@@ -96,10 +96,7 @@ public static partial class Utils
     /// <param name="action"></param>
     public static void UIInvokeIfRequired(Action action)
     {
-        if (Thread.CurrentThread.ManagedThreadId == Application.Current.Dispatcher.Thread.ManagedThreadId)
-            action();
-        else
-            Application.Current.Dispatcher.Invoke(action);
+        Dispatcher.UIThread.Invoke(action);
     }
 
     public static int Align(int num, int align)
@@ -228,9 +225,9 @@ public static partial class Utils
         if (CultureInfo.CurrentCulture.ThreeLetterISOLanguageName != "eng")
             Languages.Add(Language.Get(CultureInfo.CurrentCulture));
 
-        foreach (System.Windows.Forms.InputLanguage lang in System.Windows.Forms.InputLanguage.InstalledInputLanguages)
-            if (lang.Culture.ThreeLetterISOLanguageName != CultureInfo.CurrentCulture.ThreeLetterISOLanguageName && lang.Culture.ThreeLetterISOLanguageName != "eng")
-                Languages.Add(Language.Get(lang.Culture));
+        //foreach (System.Windows.Forms.InputLanguage lang in System.Windows.Forms.InputLanguage.InstalledInputLanguages)
+        //    if (lang.Culture.ThreeLetterISOLanguageName != CultureInfo.CurrentCulture.ThreeLetterISOLanguageName && lang.Culture.ThreeLetterISOLanguageName != "eng")
+        //        Languages.Add(Language.Get(lang.Culture));
 
         Languages.Add(Language.English);
 
@@ -462,36 +459,7 @@ public static partial class Utils
         // Return formatted number with suffix
         return readable.ToString("0.## ") + suffix;
     }
-    static List<PerformanceCounter> gpuCounters;
-    public static void GetGPUCounters()
-    {
-        PerformanceCounterCategory category = new("GPU Engine");
-        string[] counterNames = category.GetInstanceNames();
-        gpuCounters = new List<PerformanceCounter>();
 
-        foreach (string counterName in counterNames)
-            if (counterName.EndsWith("engtype_3D"))
-                foreach (var counter in category.GetCounters(counterName))
-                    if (counter.CounterName == "Utilization Percentage")
-                        gpuCounters.Add(counter);
-    }
-    public static float GetGPUUsage()
-    {
-        float result = 0f;
-
-        try
-        {
-            if (gpuCounters == null) GetGPUCounters();
-
-            gpuCounters.ForEach(x => { _ = x.NextValue(); });
-            Thread.Sleep(1000);
-            gpuCounters.ForEach(x => { result += x.NextValue(); });
-
-        }
-        catch (Exception e) { Log($"[GPUUsage] Error {e.Message}"); result = -1f; GetGPUCounters(); }
-
-        return result;
-    }
     public static string GZipDecompress(string filename)
     {
         string newFileName = "";
@@ -534,16 +502,6 @@ public static partial class Utils
         return Marshal.PtrToStringUTF8((nint)bytePtr);
         #endif
     }
-
-    public static System.Windows.Media.Color WinFormsToWPFColor(System.Drawing.Color sColor)
-        => System.Windows.Media.Color.FromArgb(sColor.A, sColor.R, sColor.G, sColor.B);
-    public static System.Drawing.Color WPFToWinFormsColor(System.Windows.Media.Color wColor)
-        => System.Drawing.Color.FromArgb(wColor.A, wColor.R, wColor.G, wColor.B);
-
-    public static System.Windows.Media.Color VorticeToWPFColor(Vortice.Mathematics.Color sColor)
-        => System.Windows.Media.Color.FromArgb(sColor.A, sColor.R, sColor.G, sColor.B);
-    public static Vortice.Mathematics.Color WPFToVorticeColor(System.Windows.Media.Color wColor)
-        => new Vortice.Mathematics.Color(wColor.R, wColor.G, wColor.B, wColor.A);
 
     public static double SWFREQ_TO_TICKS =  10000000.0 / Stopwatch.Frequency;
     public static string ToHexadecimal(byte[] bytes)

@@ -10,6 +10,7 @@ using FlyleafLib.MediaFramework.MediaRenderer;
 
 using static FlyleafLib.Utils;
 using static FlyleafLib.Logger;
+using Avalonia;
 
 namespace FlyleafLib.MediaPlayer;
 
@@ -56,37 +57,37 @@ unsafe partial class Player
 */
         Seek((int)(chapter.StartTime / 10000.0), true);
 
-    public void CopyToClipboard()
-    {
-        if (decoder.Playlist.Url == null) 
-            Clipboard.SetText("");
-        else
-            Clipboard.SetText(decoder.Playlist.Url);
-    }
-    public void CopyItemToClipboard()
-    {
-        if (decoder.Playlist.Selected == null || decoder.Playlist.Selected.DirectUrl == null)
-            Clipboard.SetText("");
-        else
-            Clipboard.SetText(decoder.Playlist.Selected.DirectUrl);
-    }
-    public void OpenFromClipboard()
-        => OpenAsync(Clipboard.GetText());
-    public void OpenFromFileDialog()
-    {
-        bool wasActivityEnabled = Activity.IsEnabled;
-        Activity.IsEnabled = false;
-        IsOpenFileDialogOpen = true;
+    //public void CopyToClipboard()
+    //{
+    //    if (decoder.Playlist.Url == null) 
+    //        Clipboard.SetText("");
+    //    else
+    //        Clipboard.SetText(decoder.Playlist.Url);
+    //}
+    //public void CopyItemToClipboard()
+    //{
+    //    if (decoder.Playlist.Selected == null || decoder.Playlist.Selected.DirectUrl == null)
+    //        Clipboard.SetText("");
+    //    else
+    //        Clipboard.SetText(decoder.Playlist.Selected.DirectUrl);
+    //}
+    //public void OpenFromClipboard()
+    //    => OpenAsync(Clipboard.GetText());
+    //public void OpenFromFileDialog()
+    //{
+    //    bool wasActivityEnabled = Activity.IsEnabled;
+    //    Activity.IsEnabled = false;
+    //    IsOpenFileDialogOpen = true;
 
-        System.Windows.Forms.OpenFileDialog openFileDialog = new();
-        var res = openFileDialog.ShowDialog();
+    //    System.Windows.Forms.OpenFileDialog openFileDialog = new();
+    //    var res = openFileDialog.ShowDialog();
 
-        if(res == System.Windows.Forms.DialogResult.OK)
-            OpenAsync(openFileDialog.FileName);
+    //    if(res == System.Windows.Forms.DialogResult.OK)
+    //        OpenAsync(openFileDialog.FileName);
 
-        Activity.IsEnabled = wasActivityEnabled;
-        IsOpenFileDialogOpen = false;
-    }
+    //    Activity.IsEnabled = wasActivityEnabled;
+    //    IsOpenFileDialogOpen = false;
+    //}
 
     public void ShowFrame(int frameIndex)
     {
@@ -244,8 +245,8 @@ unsafe partial class Player
     public void SpeedDown()     => Speed -= Config.Player.SpeedOffset;
     public void SpeedDown2()    => Speed -= Config.Player.SpeedOffset2;
 
-    public void RotateRight()   => renderer.Rotation = (renderer.Rotation + 90) % 360;
-    public void RotateLeft()    => renderer.Rotation = renderer.Rotation < 90 ? 360 + renderer.Rotation - 90 : renderer.Rotation - 90;
+    //public void RotateRight()   => renderer.Rotation = (renderer.Rotation + 90) % 360;
+    //public void RotateLeft()    => renderer.Rotation = renderer.Rotation < 90 ? 360 + renderer.Rotation - 90 : renderer.Rotation - 90;
 
     public void FullScreen()    => Host?.Player_SetFullScreen(true);
     public void NormalScreen()  => Host?.Player_SetFullScreen(false);
@@ -427,7 +428,7 @@ unsafe partial class Player
 
         bool npx = renderer.PanXOffset != 0;
         bool npy = renderer.PanXOffset != 0;
-        bool npr = renderer.Rotation != 0;
+        //bool npr = renderer.Rotation != 0;
         bool npz = renderer.Zoom != 1;
         renderer.SetPanAll(0, 0, 0, 1, Renderer.ZoomCenterPoint, true); // Pan X/Y, Rotation, Zoom, Zoomcenter, Refresh
 
@@ -435,7 +436,7 @@ unsafe partial class Player
         {
             if (npx) Raise(nameof(PanXOffset));
             if (npy) Raise(nameof(PanYOffset));
-            if (npr) Raise(nameof(Rotation));
+            //if (npr) Raise(nameof(Rotation));
             if (npz) Raise(nameof(Zoom));
         });
     }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 
-using Vortice.MediaFoundation;
-
 namespace FlyleafLib.MediaFramework.MediaDevice;
 
 public class VideoDevice : DeviceBase<VideoDeviceStream>
@@ -15,13 +13,14 @@ public class VideoDevice : DeviceBase<VideoDeviceStream>
 
     public static void RefreshDevices()
     {
-        Utils.UIInvokeIfRequired(() =>
-        {
-            Engine.Video.CapDevices.Clear();
+        //TODO: RefreshDevices
+        //Utils.UIInvokeIfRequired(() =>
+        //{
+        //    Engine.Video.CapDevices.Clear();
 
-            var devices = MediaFactory.MFEnumVideoDeviceSources();
-                foreach (var device in devices)
-                try { Engine.Video.CapDevices.Add(new VideoDevice(device.FriendlyName, device.SymbolicLink)); } catch(Exception) { }
-        });
+        //    var devices = MediaFactory.MFEnumVideoDeviceSources();
+        //        foreach (var device in devices)
+        //        try { Engine.Video.CapDevices.Add(new VideoDevice(device.FriendlyName, device.SymbolicLink)); } catch(Exception) { }
+        //});
     }
 }

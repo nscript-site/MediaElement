@@ -46,18 +46,18 @@ public static class Logger
             logLevels.Add(loglevel, loglevel.ToString().PadRight(5, ' '));
 
         // Flush File Data on Application Exit
-        System.Windows.Application.Current.Exit += (o, e) =>
-        {
-            lock (lockFileStream)
-            {
-                if (fileStream != null)
-                {
-                    while (fileData.TryDequeue(out byte[] data))
-                        fileStream.Write(data, 0, data.Length);
-                    fileStream.Dispose();
-                }
-            }
-        };
+        //System.Windows.Application.Current.Exit += (o, e) =>
+        //{
+        //    lock (lockFileStream)
+        //    {
+        //        if (fileStream != null)
+        //        {
+        //            while (fileData.TryDequeue(out byte[] data))
+        //                fileStream.Write(data, 0, data.Length);
+        //            fileStream.Dispose();
+        //        }
+        //    }
+        //};
     }
 
     internal static void SetOutput()

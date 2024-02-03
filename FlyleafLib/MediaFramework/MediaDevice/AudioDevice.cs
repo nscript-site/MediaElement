@@ -1,5 +1,4 @@
 ﻿using System;
-using Vortice.MediaFoundation;
 
 namespace FlyleafLib.MediaFramework.MediaDevice;
 
@@ -10,13 +9,14 @@ public class AudioDevice : DeviceBase<AudioDeviceStream>
 
     public static void RefreshDevices()
     {
-        Utils.UIInvokeIfRequired(() =>
-        {
-            Engine.Audio.CapDevices.Clear();
+        //TODO: RefreshDevices
+        //Utils.UIInvokeIfRequired(() =>
+        //{
+        //    Engine.Audio.CapDevices.Clear();
 
-            var devices = MediaFactory.MFEnumAudioDeviceSources();
-                foreach (var device in devices)
-                    try { Engine.Audio.CapDevices.Add(new AudioDevice(device.FriendlyName, device.SymbolicLink)); } catch(Exception) { }
-        });
+        //    var devices = MediaFactory.MFEnumAudioDeviceSources();
+        //        foreach (var device in devices)
+        //            try { Engine.Audio.CapDevices.Add(new AudioDevice(device.FriendlyName, device.SymbolicLink)); } catch(Exception) { }
+        //});
     }
 }

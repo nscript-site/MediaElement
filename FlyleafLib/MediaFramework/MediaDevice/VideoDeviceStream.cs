@@ -5,8 +5,6 @@ using System.Reflection;
 
 using FFmpeg.AutoGen;
 
-using Vortice.MediaFoundation;
-
 namespace FlyleafLib.MediaFramework.MediaDevice;
 
 public class VideoDeviceStream : DeviceStreamBase
@@ -18,10 +16,10 @@ public class VideoDeviceStream : DeviceStreamBase
     public int      FrameRate           { get; }
     private string  FFmpegFormat        { get; }
 
-    public VideoDeviceStream(string deviceName, Guid majorType, Guid subType, int frameSizeWidth, int frameSizeHeight, int frameRate, int frameRateDenominator) : base(deviceName)
+    public VideoDeviceStream(string deviceName, string majorType, string subType, int frameSizeWidth, int frameSizeHeight, int frameRate, int frameRateDenominator) : base(deviceName)
     {
-        MajorType           = MediaTypeGuids.Video == majorType ? "Video" : "Unknown";
-        SubType             = GetPropertyName(subType);
+        MajorType           = majorType =="video" ? "Video" : "Unknown";
+        SubType             = subType;
         FrameSizeWidth      = frameSizeWidth;
         FrameSizeHeight     = frameSizeHeight;
         FrameRate           = frameRate / frameRateDenominator;
@@ -29,20 +27,20 @@ public class VideoDeviceStream : DeviceStreamBase
         Url                 = $"fmt://dshow?video={DeviceFriendlyName}&video_size={FrameSizeWidth}x{FrameSizeHeight}&framerate={FrameRate}&{FFmpegFormat}";
     }
 
-    private static string GetPropertyName(Guid guid)
-    {
-        var type = typeof(VideoFormatGuids);
-        foreach (var property in type.GetFields(BindingFlags.Public | BindingFlags.Static))
-            if (property.FieldType == typeof(Guid))
-            {
-                object temp = property.GetValue(null);
-                if (temp is Guid value)
-                    if (value == guid)
-                        return property.Name.ToUpper();
-            }
+    //private static string GetPropertyName(Guid guid)
+    //{
+    //    var type = typeof(VideoFormatGuids);
+    //    foreach (var property in type.GetFields(BindingFlags.Public | BindingFlags.Static))
+    //        if (property.FieldType == typeof(Guid))
+    //        {
+    //            object temp = property.GetValue(null);
+    //            if (temp is Guid value)
+    //                if (value == guid)
+    //                    return property.Name.ToUpper();
+    //        }
 
-        return null;
-    }
+    //    return null;
+    //}
     private static unsafe string GetFFmpegFormat(string subType)
     {
         switch (subType)
@@ -64,102 +62,103 @@ public class VideoDeviceStream : DeviceStreamBase
     public static IList<VideoDeviceStream> GetVideoFormatsForVideoDevice(string friendlyName, string symbolicLink)
     {
         List<VideoDeviceStream> formatList = new();
+        return formatList;
 
-        using (var mediaSource = GetMediaSourceFromVideoDevice(symbolicLink))
-        {
-            if (mediaSource == null)
-                return null;
+        //using (var mediaSource = GetMediaSourceFromVideoDevice(symbolicLink))
+        //{
+        //    if (mediaSource == null)
+        //        return null;
 
-            using var sourcePresentationDescriptor = mediaSource.CreatePresentationDescriptor();
-            int sourceStreamCount = sourcePresentationDescriptor.StreamDescriptorCount;
+        //    using var sourcePresentationDescriptor = mediaSource.CreatePresentationDescriptor();
+        //    int sourceStreamCount = sourcePresentationDescriptor.StreamDescriptorCount;
 
-            for (int i = 0; i < sourceStreamCount; i++)
-            {
-                var guidMajorType = GetMajorMediaTypeFromPresentationDescriptor(sourcePresentationDescriptor, i);
-                if (guidMajorType != MediaTypeGuids.Video)
-                    continue;
+        //    for (int i = 0; i < sourceStreamCount; i++)
+        //    {
+        //        var guidMajorType = GetMajorMediaTypeFromPresentationDescriptor(sourcePresentationDescriptor, i);
+        //        if (guidMajorType != MediaTypeGuids.Video)
+        //            continue;
 
-                sourcePresentationDescriptor.GetStreamDescriptorByIndex(i, out var streamIsSelected, out var videoStreamDescriptor);
+        //        sourcePresentationDescriptor.GetStreamDescriptorByIndex(i, out var streamIsSelected, out var videoStreamDescriptor);
 
-                using (videoStreamDescriptor)
-                {
-                    if (streamIsSelected == false)
-                        continue;
+        //        using (videoStreamDescriptor)
+        //        {
+        //            if (streamIsSelected == false)
+        //                continue;
 
-                    using var typeHandler = videoStreamDescriptor.MediaTypeHandler;
-                    int mediaTypeCount = typeHandler.MediaTypeCount;
+        //            using var typeHandler = videoStreamDescriptor.MediaTypeHandler;
+        //            int mediaTypeCount = typeHandler.MediaTypeCount;
 
-                    for (int mediaTypeId = 0; mediaTypeId < mediaTypeCount; mediaTypeId++)
-                        using (var workingMediaType = typeHandler.GetMediaTypeByIndex(mediaTypeId))
-                        {
-                            var videoFormat = GetVideoFormatFromMediaType(friendlyName, workingMediaType);
+        //            for (int mediaTypeId = 0; mediaTypeId < mediaTypeCount; mediaTypeId++)
+        //                using (var workingMediaType = typeHandler.GetMediaTypeByIndex(mediaTypeId))
+        //                {
+        //                    var videoFormat = GetVideoFormatFromMediaType(friendlyName, workingMediaType);
 
-                            if (videoFormat.SubType != "NV12") // NV12 is not playable TODO check support for video formats
-                                formatList.Add(videoFormat);
-                        }
-                }
-            }
-        }
+        //                    if (videoFormat.SubType != "NV12") // NV12 is not playable TODO check support for video formats
+        //                        formatList.Add(videoFormat);
+        //                }
+        //        }
+        //    }
+        //}
 
-        return formatList.OrderBy(format => format.SubType).ThenBy(format => format.FrameSizeHeight).ThenBy(format => format.FrameRate).ToList();
+        //return formatList.OrderBy(format => format.SubType).ThenBy(format => format.FrameSizeHeight).ThenBy(format => format.FrameRate).ToList();
     }
 
-    private static IMFMediaSource GetMediaSourceFromVideoDevice(string symbolicLink)
-    {
-        using var attributeContainer = MediaFactory.MFCreateAttributes(2);
-        attributeContainer.Set(CaptureDeviceAttributeKeys.SourceType, CaptureDeviceAttributeKeys.SourceTypeVidcap);
-        attributeContainer.Set(CaptureDeviceAttributeKeys.SourceTypeVidcapSymbolicLink, symbolicLink);
+    //private static IMFMediaSource GetMediaSourceFromVideoDevice(string symbolicLink)
+    //{
+    //    using var attributeContainer = MediaFactory.MFCreateAttributes(2);
+    //    attributeContainer.Set(CaptureDeviceAttributeKeys.SourceType, CaptureDeviceAttributeKeys.SourceTypeVidcap);
+    //    attributeContainer.Set(CaptureDeviceAttributeKeys.SourceTypeVidcapSymbolicLink, symbolicLink);
 
-        IMFMediaSource ret = null;
-        try
-        { ret = MediaFactory.MFCreateDeviceSource(attributeContainer); }
-        catch (Exception) { }
+    //    IMFMediaSource ret = null;
+    //    try
+    //    { ret = MediaFactory.MFCreateDeviceSource(attributeContainer); }
+    //    catch (Exception) { }
 
-        return ret;
-    }
+    //    return ret;
+    //}
 
-    private static Guid GetMajorMediaTypeFromPresentationDescriptor(IMFPresentationDescriptor presentationDescriptor, int streamIndex)
-    {
-        presentationDescriptor.GetStreamDescriptorByIndex(streamIndex, out _, out var streamDescriptor);
+    //private static Guid GetMajorMediaTypeFromPresentationDescriptor(IMFPresentationDescriptor presentationDescriptor, int streamIndex)
+    //{
+    //    presentationDescriptor.GetStreamDescriptorByIndex(streamIndex, out _, out var streamDescriptor);
 
-        using (streamDescriptor)
-            return GetMajorMediaTypeFromStreamDescriptor(streamDescriptor);
-    }
+    //    using (streamDescriptor)
+    //        return GetMajorMediaTypeFromStreamDescriptor(streamDescriptor);
+    //}
 
-    private static Guid GetMajorMediaTypeFromStreamDescriptor(IMFStreamDescriptor streamDescriptor)
-    {
-        using var pHandler = streamDescriptor.MediaTypeHandler;
-        var guidMajorType = pHandler.MajorType;
+    //private static Guid GetMajorMediaTypeFromStreamDescriptor(IMFStreamDescriptor streamDescriptor)
+    //{
+    //    using var pHandler = streamDescriptor.MediaTypeHandler;
+    //    var guidMajorType = pHandler.MajorType;
 
-        return guidMajorType;
-    }
+    //    return guidMajorType;
+    //}
 
-    private static VideoDeviceStream GetVideoFormatFromMediaType(string videoDeviceName, IMFMediaType mediaType)
-    {
-        // MF_MT_MAJOR_TYPE
-        // Major type GUID, we return this as human readable text
-        var majorType = mediaType.MajorType;
+    //private static VideoDeviceStream GetVideoFormatFromMediaType(string videoDeviceName, IMFMediaType mediaType)
+    //{
+    //    // MF_MT_MAJOR_TYPE
+    //    // Major type GUID, we return this as human readable text
+    //    var majorType = mediaType.MajorType;
 
-        // MF_MT_SUBTYPE
-        // Subtype GUID which describes the basic media type, we return this as human readable text
-        var subType = mediaType.Get<Guid>(MediaTypeAttributeKeys.Subtype);
+    //    // MF_MT_SUBTYPE
+    //    // Subtype GUID which describes the basic media type, we return this as human readable text
+    //    var subType = mediaType.Get<Guid>(MediaTypeAttributeKeys.Subtype);
 
-        // MF_MT_FRAME_SIZE
-        // the Width and height of a video frame, in pixels
-        MediaFactory.MFGetAttributeSize(mediaType, MediaTypeAttributeKeys.FrameSize, out uint frameSizeWidth, out uint frameSizeHeight);
+    //    // MF_MT_FRAME_SIZE
+    //    // the Width and height of a video frame, in pixels
+    //    MediaFactory.MFGetAttributeSize(mediaType, MediaTypeAttributeKeys.FrameSize, out uint frameSizeWidth, out uint frameSizeHeight);
 
-        // MF_MT_FRAME_RATE
-        // The frame rate is expressed as a ratio.The upper 32 bits of the attribute value contain the numerator and the lower 32 bits contain the denominator. 
-        // For example, if the frame rate is 30 frames per second(fps), the ratio is 30 / 1.If the frame rate is 29.97 fps, the ratio is 30,000 / 1001.
-        // we report this back to the user as a decimal
-        MediaFactory.MFGetAttributeRatio(mediaType, MediaTypeAttributeKeys.FrameRate, out uint frameRate, out uint frameRateDenominator);
+    //    // MF_MT_FRAME_RATE
+    //    // The frame rate is expressed as a ratio.The upper 32 bits of the attribute value contain the numerator and the lower 32 bits contain the denominator. 
+    //    // For example, if the frame rate is 30 frames per second(fps), the ratio is 30 / 1.If the frame rate is 29.97 fps, the ratio is 30,000 / 1001.
+    //    // we report this back to the user as a decimal
+    //    MediaFactory.MFGetAttributeRatio(mediaType, MediaTypeAttributeKeys.FrameRate, out uint frameRate, out uint frameRateDenominator);
 
-        VideoDeviceStream videoFormat = new(videoDeviceName, majorType, subType, (int)frameSizeWidth,
-            (int)frameSizeHeight,
-            (int)frameRate,
-            (int)frameRateDenominator);
+    //    VideoDeviceStream videoFormat = new(videoDeviceName, majorType, subType, (int)frameSizeWidth,
+    //        (int)frameSizeHeight,
+    //        (int)frameRate,
+    //        (int)frameRateDenominator);
 
-        return videoFormat;
-    }
+    //    return videoFormat;
+    //}
     #endregion
 }

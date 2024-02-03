@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Input;
+using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 
@@ -24,18 +25,10 @@ partial class Player
     /// <param name="e"></param>
     public static bool KeyDown(Player player, KeyEventArgs e)
     {
-        e.Handled = KeyDown(player, e.Key == Key.System ? e.SystemKey : e.Key);
+        e.Handled = KeyDown(player, e.Key);
 
         return e.Handled;
     }
-
-    /// <summary>
-    /// Can be used to route KeyDown events (WinForms)
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="e"></param>
-    public static void KeyDown(Player player, System.Windows.Forms.KeyEventArgs e)
-        => e.Handled = KeyDown(player, KeyInterop.KeyFromVirtualKey((int)e.KeyCode));
 
     /// <summary>
     /// Can be used to route KeyUp events (WPF)
@@ -44,18 +37,10 @@ partial class Player
     /// <param name="e"></param>
     public static bool KeyUp(Player player, KeyEventArgs e)
     {
-        e.Handled = KeyUp(player, e.Key == Key.System ? e.SystemKey : e.Key);
+        e.Handled = KeyUp(player, e.Key);
 
         return e.Handled;
     }
-
-    /// <summary>
-    /// Can be used to route KeyUp events (WinForms)
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="e"></param>
-    public static void KeyUp(Player player, System.Windows.Forms.KeyEventArgs e)
-        => e.Handled = KeyUp(player, KeyInterop.KeyFromVirtualKey((int)e.KeyCode));
 
     public static bool KeyDown(Player player, Key key)
     {
@@ -68,10 +53,11 @@ partial class Player
             return false;
 
         foreach(var binding in player.Config.Player.KeyBindings.Keys)
-            if (binding.Key     == key && !binding.IsKeyUp &&
-                binding.Alt     == (Keyboard.IsKeyDown(Key.LeftAlt)     || Keyboard.IsKeyDown(Key.RightAlt)) &&
-                binding.Ctrl    == (Keyboard.IsKeyDown(Key.LeftCtrl)    || Keyboard.IsKeyDown(Key.RightCtrl)) &&
-                binding.Shift   == (Keyboard.IsKeyDown(Key.LeftShift)   || Keyboard.IsKeyDown(Key.RightShift))
+            if (binding.Key     == key && !binding.IsKeyUp
+                //&&
+                //binding.Alt     == (Keyboard.IsKeyDown(Key.LeftAlt)     || Keyboard.IsKeyDown(Key.RightAlt)) &&
+                //binding.Ctrl    == (Keyboard.IsKeyDown(Key.LeftCtrl)    || Keyboard.IsKeyDown(Key.RightCtrl)) &&
+                //binding.Shift   == (Keyboard.IsKeyDown(Key.LeftShift)   || Keyboard.IsKeyDown(Key.RightShift))
                 )
             {
                 if (CanDebug) player.Log.Debug($"[Keys|Down] {(binding.Action == KeyBindingAction.Custom && binding.ActionName != null ? binding.ActionName : binding.Action)}");
@@ -91,10 +77,11 @@ partial class Player
             return false;
 
         foreach (var binding in player.Config.Player.KeyBindings.Keys)
-            if (binding.Key     == key && binding.IsKeyUp &&
-                binding.Alt     == (Keyboard.IsKeyDown(Key.LeftAlt)     || Keyboard.IsKeyDown(Key.RightAlt)) &&
-                binding.Ctrl    == (Keyboard.IsKeyDown(Key.LeftCtrl)    || Keyboard.IsKeyDown(Key.RightCtrl)) &&
-                binding.Shift   == (Keyboard.IsKeyDown(Key.LeftShift)   || Keyboard.IsKeyDown(Key.RightShift))
+            if (binding.Key     == key && binding.IsKeyUp
+                //&&
+                //binding.Alt     == (Keyboard.IsKeyDown(Key.LeftAlt)     || Keyboard.IsKeyDown(Key.RightAlt)) &&
+                //binding.Ctrl    == (Keyboard.IsKeyDown(Key.LeftCtrl)    || Keyboard.IsKeyDown(Key.RightCtrl)) &&
+                //binding.Shift   == (Keyboard.IsKeyDown(Key.LeftShift)   || Keyboard.IsKeyDown(Key.RightShift))
                 )
             {
                 if (CanDebug) player.Log.Debug($"[Keys|Up] {(binding.Action == KeyBindingAction.Custom && binding.ActionName != null ? binding.ActionName : binding.Action)}");
@@ -360,17 +347,17 @@ public class KeysConfig
             case KeyBindingAction.ToggleSubtitles:
                 return player.Subtitles.Toggle;
 
-            case KeyBindingAction.OpenFromClipboard:
-                return player.OpenFromClipboard;
+            //case KeyBindingAction.OpenFromClipboard:
+            //    return player.OpenFromClipboard;
 
-            case KeyBindingAction.OpenFromFileDialog:
-                return player.OpenFromFileDialog;
+            //case KeyBindingAction.OpenFromFileDialog:
+            //    return player.OpenFromFileDialog;
 
-            case KeyBindingAction.CopyToClipboard:
-                return player.CopyToClipboard;
+            //case KeyBindingAction.CopyToClipboard:
+            //    return player.CopyToClipboard;
 
-            case KeyBindingAction.CopyItemToClipboard:
-                return player.CopyItemToClipboard;
+            //case KeyBindingAction.CopyItemToClipboard:
+            //    return player.CopyItemToClipboard;
 
             case KeyBindingAction.Flush:
                 return player.Flush;
@@ -387,8 +374,8 @@ public class KeysConfig
             case KeyBindingAction.TogglePlayPause:
                 return player.TogglePlayPause;
 
-            case KeyBindingAction.TakeSnapshot:
-                return player.Commands.TakeSnapshotAction;
+            //case KeyBindingAction.TakeSnapshot:
+            //    return player.Commands.TakeSnapshotAction;
 
             case KeyBindingAction.NormalScreen:
                 return player.NormalScreen;

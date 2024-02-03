@@ -1,18 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Windows.Data;
-
-using SharpGen.Runtime;
-using SharpGen.Runtime.Win32;
-
-using Vortice.MediaFoundation;
-using static Vortice.XAudio2.XAudio2;
 
 using FlyleafLib.MediaFramework.MediaDevice;
 
 namespace FlyleafLib;
 
-public class AudioEngine : CallbackBase, IMMNotificationClient
+public class AudioEngine
 {
     /* TODO
      * 
@@ -57,37 +50,36 @@ public class AudioEngine : CallbackBase, IMMNotificationClient
 
     public string GetDeviceId(string deviceName)
     {
-        if (deviceName == DefaultDeviceName)
-            return DefaultDeviceId;
+        //if (deviceName == DefaultDeviceName)
+        //    return DefaultDeviceId;
 
-        foreach(var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
-        {
-            if (device.FriendlyName.ToLower() != deviceName.ToLower())
-                continue;
+        //foreach(var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
+        //{
+        //    if (device.FriendlyName.ToLower() != deviceName.ToLower())
+        //        continue;
 
-            return device.Id;
-        }
+        //    return device.Id;
+        //}
 
         throw new Exception("The specified audio device doesn't exist");
     }
     public string GetDeviceName(string deviceId)
     {
-        if (deviceId == DefaultDeviceId)
-            return DefaultDeviceName;
+        //if (deviceId == DefaultDeviceId)
+        //    return DefaultDeviceName;
 
-        foreach(var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
-        {
-            if (device.Id.ToLower() != deviceId.ToLower())
-                continue;
+        //foreach(var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
+        //{
+        //    if (device.Id.ToLower() != deviceId.ToLower())
+        //        continue;
 
-            return device.FriendlyName;
-        }
+        //    return device.FriendlyName;
+        //}
 
         throw new Exception("The specified audio device doesn't exist");
     }
     #endregion
 
-    IMMDeviceEnumerator deviceEnum;
     private object      locker = new();
 
     public AudioEngine()
@@ -98,7 +90,7 @@ public class AudioEngine : CallbackBase, IMMNotificationClient
             return;
         }
 
-        BindingOperations.EnableCollectionSynchronization(Devices, lockDevices);
+        //BindingOperations.EnableCollectionSynchronization(Devices, lockDevices);
         EnumerateDevices();
     }
 
@@ -106,81 +98,81 @@ public class AudioEngine : CallbackBase, IMMNotificationClient
     {
         try
         {
-            deviceEnum = new IMMDeviceEnumerator();
+            //deviceEnum = new IMMDeviceEnumerator();
 
-            var defaultDevice = deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            if (defaultDevice == null)
-            {
-                Failed = true;
-                return;
-            }
+            //var defaultDevice = deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+            //if (defaultDevice == null)
+            //{
+            //    Failed = true;
+            //    return;
+            //}
 
-            lock (lockDevices)
-            {
-                Devices.Clear();
-                Devices.Add(DefaultDeviceName);
-                foreach (var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
-                    Devices.Add(device.FriendlyName);
-            }
+            //lock (lockDevices)
+            //{
+            //    Devices.Clear();
+            //    Devices.Add(DefaultDeviceName);
+            //    foreach (var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
+            //        Devices.Add(device.FriendlyName);
+            //}
 
-            CurrentDeviceId     = defaultDevice.Id;
-            CurrentDeviceName   = defaultDevice.FriendlyName;
+            //CurrentDeviceId     = defaultDevice.Id;
+            //CurrentDeviceName   = defaultDevice.FriendlyName;
 
-            if (Logger.CanInfo)
-            {
-                string dump = "";
-                foreach (var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
-                    dump += $"{device.Id} | {device.FriendlyName} {(defaultDevice.Id == device.Id ? "*" : "")}\r\n";
-                Engine.Log.Info($"Audio Devices\r\n{dump}");
-            }
+            //if (Logger.CanInfo)
+            //{
+            //    string dump = "";
+            //    foreach (var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
+            //        dump += $"{device.Id} | {device.FriendlyName} {(defaultDevice.Id == device.Id ? "*" : "")}\r\n";
+            //    Engine.Log.Info($"Audio Devices\r\n{dump}");
+            //}
 
-            var xaudio2 = XAudio2Create();
+            //var xaudio2 = XAudio2Create();
 
-            if (xaudio2 == null)
-                Failed = true;
-            else
-                xaudio2.Dispose();
+            //if (xaudio2 == null)
+            //    Failed = true;
+            //else
+            //    xaudio2.Dispose();
 
-            deviceEnum.RegisterEndpointNotificationCallback(this);
+            //deviceEnum.RegisterEndpointNotificationCallback(this);
 
         } catch { Failed = true; }
     }
     private void RefreshDevices()
     {
         // Refresh Devices and initialize audio players if requried
-        lock (locker)
-        {
-            Utils.UIInvokeIfRequired(() =>
-            {
-                lock (lockDevices)
-                {
-                    Devices.Clear();
-                    Devices.Add(DefaultDeviceName);
-                    foreach(var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
-                        Devices.Add(device.FriendlyName);
-                }
+        //lock (locker)
+        //{
+        //    Utils.UIInvokeIfRequired(() =>
+        //    {
+        //        lock (lockDevices)
+        //        {
+        //            Devices.Clear();
+        //            Devices.Add(DefaultDeviceName);
+        //            foreach(var device in deviceEnum.EnumAudioEndpoints(DataFlow.Render, DeviceStates.Active))
+        //                Devices.Add(device.FriendlyName);
+        //        }
 
-                foreach(var player in Engine.Players)
-                {
-                    if (!Devices.Contains(player.Audio.Device))
-                        player.Audio.Device = DefaultDeviceName;
-                    else
-                        player.Audio.RaiseDevice();
-                }
-            });
+        //        foreach(var player in Engine.Players)
+        //        {
+        //            if (!Devices.Contains(player.Audio.Device))
+        //                player.Audio.Device = DefaultDeviceName;
+        //            else
+        //                player.Audio.RaiseDevice();
+        //        }
+        //    });
 
-            var defaultDevice =  deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            if (defaultDevice != null)
-            {
-                CurrentDeviceId     = defaultDevice.Id;
-                CurrentDeviceName   = defaultDevice.FriendlyName;
-            }
-        }
+        //    var defaultDevice =  deviceEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        //    if (defaultDevice != null)
+        //    {
+        //        CurrentDeviceId     = defaultDevice.Id;
+        //        CurrentDeviceName   = defaultDevice.FriendlyName;
+        //    }
+        //}
     }
 
     public void OnDeviceStateChanged(string pwstrDeviceId, int newState) => RefreshDevices();
     public void OnDeviceAdded(string pwstrDeviceId) => RefreshDevices();
     public void OnDeviceRemoved(string pwstrDeviceId) => RefreshDevices();
-    public void OnDefaultDeviceChanged(DataFlow flow, Role role, string pwstrDefaultDeviceId) => RefreshDevices();
-    public void OnPropertyValueChanged(string pwstrDeviceId, PropertyKey key) { }
+    public void OnDefaultDeviceChanged(string pwstrDefaultDeviceId) => RefreshDevices();
+    public void OnPropertyValueChanged(string pwstrDeviceId, string key) { }
 }

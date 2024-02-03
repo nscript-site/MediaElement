@@ -35,7 +35,7 @@ public unsafe partial class Player : NotifyPropertyChanged, IDisposable
     /// <summary>
     /// Helper ICommands for WPF MVVM
     /// </summary>
-    public Commands             Commands            { get; private set; }
+    //public Commands             Commands            { get; private set; }
 
     public Playlist             Playlist            => decoder.Playlist;
 
@@ -261,13 +261,13 @@ public unsafe partial class Player : NotifyPropertyChanged, IDisposable
     /// <summary>
     /// Pan rotation angle (for D3D11 VP allowed values are 0, 90, 180, 270 only)
     /// </summary>
-    public uint Rotation            { get => renderer.Rotation; 
-        set
-        {
-            renderer.Rotation = value;
-            RaiseUI(nameof(Rotation));
-        }
-    }
+    //public uint Rotation            { get => renderer.Rotation; 
+    //    set
+    //    {
+    //        renderer.Rotation = value;
+    //        RaiseUI(nameof(Rotation));
+    //    }
+    //}
 
     /// <summary>
     /// Whether to use reverse playback mode
@@ -379,7 +379,7 @@ public unsafe partial class Player : NotifyPropertyChanged, IDisposable
         Audio       = new Audio(this);
         Video       = new Video(this);
         Subtitles   = new Subtitles(this);
-        Commands    = new Commands(this);
+        //Commands    = new Commands(this);
 
         Config.SetPlayer(this);
         

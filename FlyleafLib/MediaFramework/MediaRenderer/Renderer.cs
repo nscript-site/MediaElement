@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
 
-using Vortice;
-using Vortice.DXGI;
-using Vortice.Direct3D11;
-using Vortice.Mathematics;
-
 using FlyleafLib.MediaFramework.MediaDecoder;
 using FlyleafLib.MediaFramework.MediaFrame;
 using FlyleafLib.MediaFramework.MediaStream;
+using Avalonia;
 
 namespace FlyleafLib.MediaFramework.MediaRenderer;
 
@@ -41,11 +37,6 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
     public int              ControlHeight   { get; private set; }
     internal IntPtr         ControlHandle;
 
-    internal Action<IDXGISwapChain2> 
-                            SwapChainWinUIClbk;
-
-    public ID3D11Device     Device          { get; private set; }
-    public bool             D3D11VPFailed   => vc == null;
     public GPUAdapter       GPUAdapter      { get; private set; }
     public bool             Disposed        { get; private set; } = true;
     public bool             SCDisposed      { get; private set; } = true;
@@ -55,10 +46,6 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
     public VideoStream      VideoStream     => VideoDecoder.VideoStream;
 
     public Viewport         GetViewport     { get; private set; }
-
-    public CornerRadius     CornerRadius    { get => cornerRadius;  set { if (cornerRadius == value) return; cornerRadius = value; UpdateCornerRadius(); } }
-    CornerRadius cornerRadius = new(0);
-    CornerRadius zeroCornerRadius = new(0);
 
     public bool             IsHDR           { get => isHDR;         private set { SetUI(ref _IsHDR, value); isHDR = value; } }
     bool _IsHDR, isHDR;
@@ -96,9 +83,8 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
         }
     }
 
-    public uint             Rotation        { get => _RotationAngle;set { lock (lockDevice) UpdateRotation(value); } }
+    //public uint             Rotation        { get => _RotationAngle;set { lock (lockDevice) UpdateRotation(value); } }
     uint _RotationAngle;
-    VideoProcessorRotation _d3d11vpRotation  = VideoProcessorRotation.Identity;
     bool rotationLinesize; // if negative should be vertically flipped
 
     public VideoProcessors  VideoProcessor      { get => videoProcessor;    private set => SetUI(ref videoProcessor, value); }
@@ -160,7 +146,7 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
             panYOffset = panY;
             this.zoom = zoom;
             zoomCenter = p;
-            UpdateRotation(rotation, false);
+            //UpdateRotation(rotation, false);
 
             if (Disposed)
                 return;
@@ -175,7 +161,7 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
     public Dictionary<VideoFilters, VideoFilter> 
                             Filters         { get; set; }
     public VideoFrame       LastFrame       { get; set; }
-    public RawRect          VideoRect       { get; set; }
+    public Rect          VideoRect       { get; set; }
 
     LogHandler Log;
 
@@ -186,32 +172,32 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
         Config      = videoDecoder.Config;
         Log         = new LogHandler(("[#" + UniqueId + "]").PadRight(8, ' ') + " [Renderer      ] ");
 
-        singleStageDesc = new Texture2DDescription()
-        {
-            Usage       = ResourceUsage.Staging,
-            Format      = Format.B8G8R8A8_UNorm,
-            ArraySize   = 1,
-            MipLevels   = 1,
-            BindFlags   = BindFlags.None,
-            CPUAccessFlags      = CpuAccessFlags.Read,
-            SampleDescription   = new SampleDescription(1, 0),
+        //singleStageDesc = new Texture2DDescription()
+        //{
+        //    Usage       = ResourceUsage.Staging,
+        //    Format      = Format.B8G8R8A8_UNorm,
+        //    ArraySize   = 1,
+        //    MipLevels   = 1,
+        //    BindFlags   = BindFlags.None,
+        //    CPUAccessFlags      = CpuAccessFlags.Read,
+        //    SampleDescription   = new SampleDescription(1, 0),
 
-            Width       = -1,
-            Height      = -1
-        };
+        //    Width       = -1,
+        //    Height      = -1
+        //};
 
-        singleGpuDesc = new Texture2DDescription()
-        {
-            Usage       = ResourceUsage.Default,
-            Format      = Format.B8G8R8A8_UNorm,
-            ArraySize   = 1,
-            MipLevels   = 1,
-            BindFlags   = BindFlags.RenderTarget | BindFlags.ShaderResource,
-            SampleDescription   = new SampleDescription(1, 0)
-        };
+        //singleGpuDesc = new Texture2DDescription()
+        //{
+        //    Usage       = ResourceUsage.Default,
+        //    Format      = Format.B8G8R8A8_UNorm,
+        //    ArraySize   = 1,
+        //    MipLevels   = 1,
+        //    BindFlags   = BindFlags.RenderTarget | BindFlags.ShaderResource,
+        //    SampleDescription   = new SampleDescription(1, 0)
+        //};
 
-        wndProcDelegate = new(WndProc);
-        wndProcDelegatePtr = Marshal.GetFunctionPointerForDelegate(wndProcDelegate);
+        //wndProcDelegate = new(WndProc);
+        //wndProcDelegatePtr = Marshal.GetFunctionPointerForDelegate(wndProcDelegate);
         ControlHandle = handle;
         Initialize();
     }
@@ -227,8 +213,8 @@ public partial class Renderer : NotifyPropertyChanged, IDisposable
         renderer.child      = this;
         parent              = renderer;
         Config              = renderer.Config;
-        wndProcDelegate     = new(WndProc);
-        wndProcDelegatePtr  = Marshal.GetFunctionPointerForDelegate(wndProcDelegate);
+        //wndProcDelegate     = new(WndProc);
+        //wndProcDelegatePtr  = Marshal.GetFunctionPointerForDelegate(wndProcDelegate);
         ControlHandle       = handle;
     }
 
